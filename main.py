@@ -23,6 +23,7 @@ try:
 except ImportError:
     Icon = None
 
+__version__ = "0.1.0"
 TARGET_RATIO = 16 / 9
 POLL_INTERVAL = 0.25
 DEBOUNCE_SECONDS = 0.6
