@@ -3,6 +3,7 @@ import struct
 import sys
 import threading
 import time
+from pathlib import Path
 from PIL import Image, ImageDraw, ImageGrab
 
 logging.basicConfig(
@@ -140,6 +141,9 @@ def monitor_loop():
 
 
 def create_icon_image():
+    icon_file = Path(__file__).parent / "assets" / "icon.ico"
+    if icon_file.exists():
+        return Image.open(icon_file).convert("RGBA")
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
     draw.rectangle([8, 14, 56, 50], fill="#4A90D9", outline="#2E6CB5", width=2)

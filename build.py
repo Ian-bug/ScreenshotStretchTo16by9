@@ -1,14 +1,17 @@
 import subprocess
 import sys
 from pathlib import Path
+from PIL import Image
 
 ROOT = Path(__file__).parent
 DIST = ROOT / "dist"
 BUILD_DIR = ROOT / "build"
 SPEC_FILE = ROOT / "ScreenshotStretchTo16by9.spec"
+ASSETS = ROOT / "assets"
 
 APP_NAME = "ScreenshotStretchTo16by9"
 ENTRY_POINT = ROOT / "main.py"
+ICON_ICO = ASSETS / "icon.ico"
 ICON_PATH = None
 
 
@@ -22,6 +25,10 @@ def install_pyinstaller():
 
 def build():
     install_pyinstaller()
+
+    global ICON_PATH
+    if ICON_ICO.exists():
+        ICON_PATH = ICON_ICO
 
     cmd = [
         sys.executable, "-m", "PyInstaller",

@@ -1,0 +1,99 @@
+name: CI / Build / Release
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - "v*"
+  pull_request:
+    branches: [main]
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install ruff Pillow
+
+      - name: Run ruff linter
+        run: ruff check main.py build.py
+
+      - name: Run ruff formatter check
+        run: ruff format --check main.py build.py
+
+      - name: Validate Python syntax
+        run: python -m py_compile main.py build.py
+
+  build:
+    name: Build Windows EXE
+    runs-on: windows-latest
+    needs: lint
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt pyinstaller>=6.0
+
+      - name: Build with PyInstaller
+        run: python build.py
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ScreenshotStretchTo16by9-exe
+          path: dist/ScreenshotStretchTo16by9.exe
+          retention-days: 7
+
+  release:
+    name: Create GitHub Release
+    runs-on: windows-latest
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt pyinstaller>=6.0
+
+      - name: Build release binary
+        run: python build.py
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Create Release and upload asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ScreenshotStretchTo16by9 v${{ steps.version.outputs.VERSION }}
+          generate_release_notes: true
+          files: dist/ScreenshotStretchTo16by9.exe
