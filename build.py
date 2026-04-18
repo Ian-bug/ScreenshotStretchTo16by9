@@ -17,11 +17,14 @@ ICON_PATH = None
 def install_pyinstaller():
     try:
         import importlib.util
+
         if not importlib.util.find_spec("PyInstaller"):
             raise ImportError
     except ImportError:
         print("Installing PyInstaller...")
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "pyinstaller>=6.0"])
+        subprocess.check_call(
+            [sys.executable, "-m", "pip", "install", "pyinstaller>=6.0"]
+        )
 
 
 def build():
@@ -32,13 +35,18 @@ def build():
         ICON_PATH = ICON_ICO
 
     cmd = [
-        sys.executable, "-m", "PyInstaller",
-        "--name", APP_NAME,
+        sys.executable,
+        "-m",
+        "PyInstaller",
+        "--name",
+        APP_NAME,
         "--onefile",
         "--windowed",
         "--noconfirm",
-        "--distpath", str(DIST),
-        "--workpath", str(BUILD_DIR),
+        "--distpath",
+        str(DIST),
+        "--workpath",
+        str(BUILD_DIR),
     ]
 
     if ICON_PATH and ICON_PATH.exists():
@@ -69,6 +77,7 @@ def build():
 
 def clean():
     import shutil
+
     for d in [DIST, BUILD_DIR]:
         if d.exists():
             shutil.rmtree(d)

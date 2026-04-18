@@ -59,28 +59,17 @@ def set_clipboard_image(img):
         rows = []
         for y in range(h - 1, -1, -1):
             off = y * w * 3
-            rows.append(raw[off:off + w * 3] + b"\x00" * pad)
+            rows.append(raw[off : off + w * 3] + b"\x00" * pad)
         pixel_data = b"".join(rows)
     else:
         stride = w * 4
         rows = []
         for y in range(h - 1, -1, -1):
             off = y * stride
-            rows.append(raw[off:off + stride])
+            rows.append(raw[off : off + stride])
         pixel_data = b"".join(rows)
 
-    hdr = struct.pack("<IiiHHIIiiII",
-                      40,
-                      w,
-                      h,
-                      1,
-                      bpp,
-                      0,
-                      len(pixel_data),
-                      0,
-                      0,
-                      0,
-                      0)
+    hdr = struct.pack("<IiiHHIIiiII", 40, w, h, 1, bpp, 0, len(pixel_data), 0, 0, 0, 0)
     dib = hdr + pixel_data
     try:
         win32clipboard.OpenClipboard()
@@ -97,6 +86,7 @@ def set_clipboard_image(img):
 
 def image_hash(img):
     import hashlib
+
     data = img.resize((64, 64), LANCZOS).tobytes()
     return hashlib.md5(data).hexdigest()
 
