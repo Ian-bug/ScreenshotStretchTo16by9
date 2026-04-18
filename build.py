@@ -1,7 +1,6 @@
 import subprocess
 import sys
 from pathlib import Path
-from PIL import Image
 
 ROOT = Path(__file__).parent
 DIST = ROOT / "dist"
@@ -17,7 +16,9 @@ ICON_PATH = None
 
 def install_pyinstaller():
     try:
-        import PyInstaller
+        import importlib.util
+        if not importlib.util.find_spec("PyInstaller"):
+            raise ImportError
     except ImportError:
         print("Installing PyInstaller...")
         subprocess.check_call([sys.executable, "-m", "pip", "install", "pyinstaller>=6.0"])
